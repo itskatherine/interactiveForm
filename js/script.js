@@ -1,7 +1,48 @@
-let otherJobInput = document.getElementById("other-title");
+//Activate autofocus on the name input
+const nameInput = document.getElementById("name").focus();
+
+//Append a cost element to the activities section to show an ongoing running total
+
+const activities = document.querySelector(".activities");
+const cost = document.createElement("p");
+activities.appendChild(cost);
+
+//Create the error messages spaces, <p>'s appended to the relevant fieldset
+const errorMessageBasicInfo = document.createElement("p");
+errorMessageBasicInfo.className = "error";
+const basicDetails = document.querySelector("fieldset");
+basicDetails.appendChild(errorMessageBasicInfo);
+
+const errorMessageActivities = document.createElement("p");
+errorMessageActivities.className = "error";
+activities.appendChild(errorMessageActivities);
+
+const paymentInfo = document.getElementById("paymentinfo");
+const errorMessagePaymentInfo = document.createElement("p");
+errorMessagePaymentInfo.className = "error";
+paymentInfo.appendChild(errorMessagePaymentInfo);
+
+//Select the other-title input and hide it until "other" is selected
+
+const otherJobInput = document.getElementById("other-title");
 otherJobInput.style.display = "none";
 
-let titleSelect = document.getElementById("title");
+//Select the title select element and hide or display it depending on whether "other" has been selected
+const titleSelect = document.getElementById("title");
+
+//The submit button
+const submit = document.querySelector("button[type = 'submit']");
+
+//Select and initialise the credit card payment option as the selected value
+const paymentMethodInput = document.querySelector("select#payment");
+const creditCardOption = document.querySelector("option[value='credit card']");
+creditCardOption.selected = "selected";
+paymentMethodInput.value = "credit card";
+
+//select the payment options ready to use later
+const ccNum = document.getElementById("cc-num");
+const zip = document.getElementById("zip");
+const cvv = document.getElementById("cvv");
 
 titleSelect.addEventListener("click", () => {
   if (titleSelect.value == "other") {
@@ -19,9 +60,9 @@ function initialiseColorSelect() {
   colorLabelSelect.innerHTML = "Please select a t-shirt theme";
 }
 
-//add click event to the design select
-//which reveals the color option
-let designSelect = document.querySelector("select#design");
+//Select and add click event to the design select
+//which reveals the color options, depending on the theme
+const designSelect = document.querySelector("select#design");
 
 designSelect.addEventListener("click", () => {
   hideOrShow("select#color", "block");
@@ -50,23 +91,153 @@ designSelect.addEventListener("click", () => {
     hideOrShow("option[value ='gold']", "none");
     colorSelect.value = "";
   } else {
+    //if none of the options are selected, the colour select label prompts the user to choose a colour
     hideOrShow("select#color", "none");
     let colorLabelSelect = document.querySelector("label[for='color']");
     colorLabelSelect.innerHTML = "Please select a t-shirt theme";
   }
 });
 
+//A function which will take the inputed element and apply the display value to that element
 function hideOrShow(selectorValue, displayValue) {
   document.querySelector(selectorValue).style.display = displayValue;
 }
 
-let activities = document.querySelector(".activities");
-let cost = document.createElement("p");
-activities.appendChild(cost);
+//Add click event to the activities section
+activities.addEventListener("click", activitiesInit);
 
-activities.addEventListener("click", () => {
+//This function which is triggered by clicking within the activities area
+function activitiesInit() {
   //maybe generate this array
   nameArray = [
+    "all",
+    "js-frameworks",
+    "js-libs",
+    "express",
+    "node",
+    "build-tools",
+    "npm",
+  ];
+
+  let checkedCostDataName = [];
+
+  //this loop creates an array of 4-part arrays which contain data about each
+  //activity, and adds it to checkedCostDataName array initialised above
+  for (let i = 0; i < nameArray.length; i++) {
+    let nameString = "input[name = '" + nameArray[i] + "']";
+    //https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes
+    //I selected the dataset values using the info on the above page
+    checkedCostDataName.push([
+      document.querySelector(nameString).checked,
+      parseInt(document.querySelector(nameString).dataset.cost),
+      document.querySelector(nameString).dataset.dayAndTime,
+      nameString,
+    ]);
+  }
+
+  //this enables and disables clashing selected events
+  //it will also apply the className disabled to the different events, which coincides with
+  //css properties, which apply a linethrough
+  //it misses out the first event because it doesn't have any time restrictions (i=1)
+  for (let i = 1; i < checkedCostDataName.length; i++) {
+    for (let j = 0; j < checkedCostDataName.length; j++) {
+      if (
+        checkedCostDataName[i][0] &&
+        checkedCostDataName[i][2] === checkedCostDataName[j][2] &&
+        document.querySelector(checkedCostDataName[j][3]).parentElement
+          .className != "disabled" &&
+        i != j
+      ) {
+        document.querySelector(
+          checkedCostDataName[j][3]
+        ).parentElement.className = "disabled";
+        document.querySelector(checkedCostDataName[j][3]).disabled = true;
+      } else if (
+        !checkedCostDataName[i][0] &&
+        checkedCostDataName[i][2] === checkedCostDataName[j][2] &&
+        document.querySelector(checkedCostDataName[j][3]).parentElement
+          .className == "disabled" &&
+        i != j
+      ) {
+        document.querySelector(
+          checkedCostDataName[j][3]
+        ).parentElement.className = "enabled";
+        document.querySelector(checkedCostDataName[j][3]).disabled = false;
+      }
+    }
+  }
+
+  let sum = 0;
+  //this loop tallies up the total cost of all the selected events and
+  //adds them to the sum variable
+  for (let i = 0; i < checkedCostDataName.length; i++) {
+    if (checkedCostDataName[i][0]) {
+      sum += checkedCostDataName[i][1];
+    }
+  }
+
+  //display the accumulated sum
+  cost.innerHTML = "Total: $" + sum;
+  validateActivities(sum); //this sum variable is then passed to the validateActivities function
+}
+
+//Payment info section, when called it set the display value of the three
+//payment options
+function setPaymentOption(creditCard, paypal, bitcoin) {
+  hideOrShow("#credit-card", creditCard);
+  hideOrShow("#paypal", paypal);
+  hideOrShow("#bitcoin", bitcoin);
+}
+
+//Payment method click event, calls the setPaymentOption() depending on the value
+//which changes the display value of the one that has been selected
+//it also validates the payment details by calling the function validatePaymentDetails
+paymentMethodInput.addEventListener("click", () => {
+  if (paymentMethodInput.value == "credit card") {
+    setPaymentOption("block", "none", "none");
+  } else if (paymentMethodInput.value == "paypal") {
+    setPaymentOption("none", "block", "none");
+  } else if (paymentMethodInput.value == "bitcoin") {
+    setPaymentOption("none", "none", "block");
+  } else if (paymentMethodInput.value == "select method") {
+    setPaymentOption("none", "none", "none");
+  }
+  validatePaymentDetails();
+});
+
+//the submit button validates the content of the different input areas
+submit.addEventListener("click", (e) => {
+  e.preventDefault(); // stops the page refreshing
+  validateBasicInfo();
+  validateActivities();
+  validatePaymentDetails();
+});
+
+function validateBasicInfo() {
+  let errorText = "";
+
+  const name = document.getElementById("name");
+  const email = document.getElementById("mail");
+
+  const emailRegex = /^([\w_\.-]+)@([\w\.-]+)\.([a-z\.]{2,5})$/;
+  //This regex was altered slightly from expression in this RegEx manual: source https://www.keycdn.com/support/regex-cheatsheet
+  if (!name.value) {
+    errorText += "Please enter your name above <br>";
+    name.className = "invalid";
+  } else {
+    name.className = "valid";
+  }
+  if (!email.value.match(emailRegex)) {
+    errorText += "Please enter a valid email address <br>";
+    email.className = "invalid";
+  } else {
+    email.className = "valid";
+  }
+  errorMessageBasicInfo.innerHTML = errorText;
+}
+
+function validateActivities() {
+  const nameArray = [
     "all",
     "js-frameworks",
     "js-libs",
@@ -122,6 +293,8 @@ activities.addEventListener("click", () => {
   }
 
   let sum = 0;
+
+  //calculate the sum of the cost of the selected activities
   for (let i = 0; i < checkedCostDataName.length; i++) {
     if (checkedCostDataName[i][0]) {
       sum += checkedCostDataName[i][1];
@@ -130,115 +303,43 @@ activities.addEventListener("click", () => {
 
   //display the accumulated sum
   cost.innerHTML = "Total: $" + sum;
-  validateActivities(sum);
-});
-
-let paymentMethodInput = document.querySelector("select#payment");
-let creditCardOption = document.querySelector("option[value='credit card']");
-creditCardOption.selected = "selected";
-paymentMethodInput.value = "credit card";
-
-//Payment info section
-function setPaymentOption(creditCard, paypal, bitcoin) {
-  hideOrShow("#credit-card", creditCard);
-  hideOrShow("#paypal", paypal);
-  hideOrShow("#bitcoin", bitcoin);
-}
-
-paymentMethodInput.addEventListener("click", () => {
-  if (paymentMethodInput.value == "credit card") {
-    setPaymentOption("block", "none", "none");
-  } else if (paymentMethodInput.value == "paypal") {
-    setPaymentOption("none", "block", "none");
-  } else if (paymentMethodInput.value == "bitcoin") {
-    setPaymentOption("none", "none", "block");
-  } else if (paymentMethodInput.value == "select method") {
-    setPaymentOption("none", "none", "none");
-  }
-  validatePaymentDetails();
-});
-
-let submit = document.querySelector("button[type = 'submit']");
-
-submit.addEventListener("click", (e) => {
-  e.preventDefault(); // stops the page refreshing
-  validateBasicInfo();
-  // validateActivities();
-  validatePaymentDetails();
-});
-
-//Create the error messages spaces
-
-let errorMessageBasicInfo = document.createElement("p");
-errorMessageBasicInfo.className = "error";
-let basicDetails = document.querySelector("fieldset");
-basicDetails.appendChild(errorMessageBasicInfo);
-
-let errorMessageActivities = document.createElement("p");
-errorMessageActivities.className = "error";
-//let activities = document.getElementById("activities");
-activities.appendChild(errorMessageActivities);
-
-let paymentInfo = document.getElementById("paymentinfo");
-let errorMessagePaymentInfo = document.createElement("p");
-errorMessagePaymentInfo.className = "error";
-paymentInfo.appendChild(errorMessagePaymentInfo);
-
-function validateBasicInfo() {
   let errorText = "";
-
-  let name = document.getElementById("name");
-  let email = document.getElementById("mail");
-
-  const emailRegex = /^([\w_\.-]+)@([\w\.-]+)\.([a-z\.]{2,5})$/;
-  //This regex was altered slightly from expression in this RegEx manual: source https://www.keycdn.com/support/regex-cheatsheet
-  if (!name.value) {
-    errorText += "A man needs a name <br>";
-    name.className = "invalid";
-  } else {
-    name.className = "valid";
-  }
-  if (!email.value.match(emailRegex)) {
-    errorText += "Please enter a valid email address <br>";
-    email.className = "invalid";
-  } else {
-    email.className = "valid";
-  }
-  errorMessageBasicInfo.innerHTML = errorText;
-}
-
-function validateActivities(sum) {
-  let errorText = "";
-  let pass = true;
+  //this generates the error text if the error condition is met when the sum is zero
   if (sum === 0) {
     errorText = "Please choose at least one activity";
-    pass = false;
   }
   errorMessageActivities.innerHTML = errorText;
-  return pass;
 }
 
-const ccNum = document.getElementById("cc-num");
-const zip = document.getElementById("zip");
-const cvv = document.getElementById("cvv");
-
+//add keyup events to the credit card payment inputs so that the error messages can be updated as
+//the user inputs the details
 ccNum.addEventListener("keyup", validatePaymentDetails);
 zip.addEventListener("keyup", validatePaymentDetails);
 cvv.addEventListener("keyup", validatePaymentDetails);
 
+//this function uses regex values to check if the credit card details are correct
+//it will then append the relevant error messages to the error message <p> element
+//it also update the class names of the credit card input spaces to reflect
+//whether it is valid or invalid
 function validatePaymentDetails() {
   let errorText = "";
   if (paymentMethodInput.value === "credit card") {
-    //ccNum.className = !ccNum.value ? "invalid" : "valid";
-    const numberOfDigitsCCRegex = /^[0-9]{13,16}$/;
-    if (numberOfDigitsCCRegex.test(ccNum.value)) {
+    const numberOfDigitsCCRegex = /^[0-9]{13,16}$/; //this regex value is for a 13-16 digit number
+
+    //the credit card will have a different error message depending on whether it is
+    //an empty value or an invalid input
+    if (ccNum.value === "") {
+      ccNum.className = "invalid";
+      errorText +=
+        "Card number: This field has been left empty, please add a number between 13-16 characters <br>";
+    } else if (numberOfDigitsCCRegex.test(ccNum.value)) {
       ccNum.className = "valid";
     } else {
       ccNum.className = "invalid";
       errorText +=
         "Card number: Please enter a number between 13-16 characters <br>";
     }
-    const zipRegex = /^[0-9]{5}$/;
+    const zipRegex = /^[0-9]{5}$/; // this regex value is for a 5 digit zip code
 
     if (zipRegex.test(zip.value)) {
       zip.className = "valid";
@@ -247,7 +348,7 @@ function validatePaymentDetails() {
       errorText += "ZIP value: Please enter a ZIP code 5 digits long.<br>";
     }
 
-    const cvvRegex = /^[0-9]{3}$/;
+    const cvvRegex = /^[0-9]{3}$/; //this regex value is for a 3 digit cvv number
 
     if (cvvRegex.test(cvv.value)) {
       cvv.className = "valid";
@@ -258,7 +359,7 @@ function validatePaymentDetails() {
   } else {
     errorText = "";
   }
-  errorMessagePaymentInfo.innerHTML = errorText;
+  errorMessagePaymentInfo.innerHTML = errorText; //the error text is updated to reflect any errors
 }
 
 setPaymentOption("block", "none", "none");
