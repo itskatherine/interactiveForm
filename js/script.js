@@ -232,7 +232,6 @@ function validateBasicInfo() {
     email.className = "valid";
   }
   errorMessageBasicInfo.innerHTML = errorText;
-  console.log("Basic details: " + pass);
   return pass;
 }
 
@@ -311,7 +310,6 @@ function validateActivities() {
     pass = false;
   }
   errorMessageActivities.innerHTML = errorText;
-  console.log("Activities: " + pass);
   return pass;
 }
 
@@ -373,7 +371,6 @@ function validatePaymentDetails() {
     pass = false;
   }
 
-  console.log("payment details: " + pass);
   errorMessagePaymentInfo.innerHTML = errorText; //the error text is updated to reflect any errors
 
   return pass;
