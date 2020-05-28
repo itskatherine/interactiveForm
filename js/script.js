@@ -44,7 +44,6 @@ const ccNum = document.getElementById("cc-num");
 const zip = document.getElementById("zip");
 const cvv = document.getElementById("cvv");
 
-//add event listener so the other job input is hidden unless other is selected
 titleSelect.addEventListener("click", () => {
   if (titleSelect.value == "other") {
     otherJobInput.style.display = "block";
@@ -206,15 +205,6 @@ paymentMethodInput.addEventListener("click", () => {
   validatePaymentDetails();
 });
 
-//the submit button validates the content of the different input areas
-submit.addEventListener("click", (e) => {
-  if (
-    !(validateBasicInfo() && validateActivities() && validatePaymentDetails())
-  ) {
-    e.preventDefault(); // stops the page refreshing
-  }
-});
-
 //this function validates the basic info input making sure there is a
 //name entered, and a valid email
 function validateBasicInfo() {
@@ -242,6 +232,7 @@ function validateBasicInfo() {
     email.className = "valid";
   }
   errorMessageBasicInfo.innerHTML = errorText;
+  console.log("Basic details: " + pass);
   return pass;
 }
 
@@ -320,6 +311,7 @@ function validateActivities() {
     pass = false;
   }
   errorMessageActivities.innerHTML = errorText;
+  console.log("Activities: " + pass);
   return pass;
 }
 
@@ -376,9 +368,31 @@ function validatePaymentDetails() {
   } else {
     errorText = "";
   }
+
+  if (paymentMethodInput.value === "select method") {
+    pass = false;
+  }
+
+  console.log("payment details: " + pass);
   errorMessagePaymentInfo.innerHTML = errorText; //the error text is updated to reflect any errors
+
   return pass;
+
+  //need to make sure it fails if no payment option chose
+  //and if other payment options are chosen
 }
+
+//the submit button validates the content of the different input areas
+submit.addEventListener("click", (e) => {
+  validateBasicInfo();
+  validateActivities();
+  validatePaymentDetails();
+  if (
+    !(validateBasicInfo() && validateActivities() && validatePaymentDetails())
+  ) {
+    e.preventDefault(); // stops the page refreshing
+  }
+});
 
 setPaymentOption("block", "none", "none"); //initialise payment option
 initialiseColorSelect(); //initialise the colour select option as hidden
