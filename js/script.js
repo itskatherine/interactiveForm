@@ -213,6 +213,8 @@ submit.addEventListener("click", (e) => {
   validatePaymentDetails();
 });
 
+//this function validates the basic info input making sure there is a
+//name entered, and a valid email
 function validateBasicInfo() {
   let errorText = "";
 
@@ -221,6 +223,7 @@ function validateBasicInfo() {
 
   const emailRegex = /^([\w_\.-]+)@([\w\.-]+)\.([a-z\.]{2,5})$/;
   //This regex was altered slightly from expression in this RegEx manual: source https://www.keycdn.com/support/regex-cheatsheet
+  //and tests for a valid email address
   if (!name.value) {
     errorText += "Please enter your name above <br>";
     name.className = "invalid";
@@ -268,7 +271,12 @@ function validateActivities() {
     for (let j = 0; j < checkedCostDataName.length; j++) {
       if (
         checkedCostDataName[i][0] &&
-        checkedCostDataName[i][2] === checkedCostDataName[j][2] &&
+        checkedCostDataName[i][2] === checkedsubmit.addEventListener("click", (e) => {
+          e.preventDefault(); // stops the page refreshing
+          validateBasicInfo();
+          validateActivities();
+          validatePaymentDetails();
+        });CostDataName[j][2] &&
         document.querySelector(checkedCostDataName[j][3]).parentElement
           .className != "disabled" &&
         i != j
@@ -362,5 +370,5 @@ function validatePaymentDetails() {
   errorMessagePaymentInfo.innerHTML = errorText; //the error text is updated to reflect any errors
 }
 
-setPaymentOption("block", "none", "none");
-initialiseColorSelect();
+setPaymentOption("block", "none", "none"); //initialise payment option
+initialiseColorSelect(); //initialise the colour select option as hidden
