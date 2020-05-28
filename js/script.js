@@ -44,6 +44,7 @@ const ccNum = document.getElementById("cc-num");
 const zip = document.getElementById("zip");
 const cvv = document.getElementById("cvv");
 
+//add event listener so the other job input is hidden unless other is selected
 titleSelect.addEventListener("click", () => {
   if (titleSelect.value == "other") {
     otherJobInput.style.display = "block";
@@ -271,12 +272,7 @@ function validateActivities() {
     for (let j = 0; j < checkedCostDataName.length; j++) {
       if (
         checkedCostDataName[i][0] &&
-        checkedCostDataName[i][2] === checkedsubmit.addEventListener("click", (e) => {
-          e.preventDefault(); // stops the page refreshing
-          validateBasicInfo();
-          validateActivities();
-          validatePaymentDetails();
-        });CostDataName[j][2] &&
+        checkedCostDataName[i][2] === checkedCostDataName[j][2] &&
         document.querySelector(checkedCostDataName[j][3]).parentElement
           .className != "disabled" &&
         i != j
