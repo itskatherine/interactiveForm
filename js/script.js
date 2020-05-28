@@ -208,15 +208,17 @@ paymentMethodInput.addEventListener("click", () => {
 
 //the submit button validates the content of the different input areas
 submit.addEventListener("click", (e) => {
-  e.preventDefault(); // stops the page refreshing
-  validateBasicInfo();
-  validateActivities();
-  validatePaymentDetails();
+  if (
+    !(validateBasicInfo() && validateActivities() && validatePaymentDetails())
+  ) {
+    e.preventDefault(); // stops the page refreshing
+  }
 });
 
 //this function validates the basic info input making sure there is a
 //name entered, and a valid email
 function validateBasicInfo() {
+  let pass = true;
   let errorText = "";
 
   const name = document.getElementById("name");
@@ -228,19 +230,23 @@ function validateBasicInfo() {
   if (!name.value) {
     errorText += "Please enter your name above <br>";
     name.className = "invalid";
+    pass = false;
   } else {
     name.className = "valid";
   }
   if (!email.value.match(emailRegex)) {
     errorText += "Please enter a valid email address <br>";
     email.className = "invalid";
+    pass = false;
   } else {
     email.className = "valid";
   }
   errorMessageBasicInfo.innerHTML = errorText;
+  return pass;
 }
 
 function validateActivities() {
+  let pass = true;
   const nameArray = [
     "all",
     "js-frameworks",
@@ -311,8 +317,10 @@ function validateActivities() {
   //this generates the error text if the error condition is met when the sum is zero
   if (sum === 0) {
     errorText = "Please choose at least one activity";
+    pass = false;
   }
   errorMessageActivities.innerHTML = errorText;
+  return pass;
 }
 
 //add keyup events to the credit card payment inputs so that the error messages can be updated as
@@ -326,6 +334,7 @@ cvv.addEventListener("keyup", validatePaymentDetails);
 //it also update the class names of the credit card input spaces to reflect
 //whether it is valid or invalid
 function validatePaymentDetails() {
+  let pass = true;
   let errorText = "";
   if (paymentMethodInput.value === "credit card") {
     const numberOfDigitsCCRegex = /^[0-9]{13,16}$/; //this regex value is for a 13-16 digit number
@@ -336,12 +345,14 @@ function validatePaymentDetails() {
       ccNum.className = "invalid";
       errorText +=
         "Card number: This field has been left empty, please add a number between 13-16 characters <br>";
+      pass = false;
     } else if (numberOfDigitsCCRegex.test(ccNum.value)) {
       ccNum.className = "valid";
     } else {
       ccNum.className = "invalid";
       errorText +=
         "Card number: Please enter a number between 13-16 characters <br>";
+      pass = false;
     }
     const zipRegex = /^[0-9]{5}$/; // this regex value is for a 5 digit zip code
 
@@ -350,6 +361,7 @@ function validatePaymentDetails() {
     } else {
       zip.className = "invalid";
       errorText += "ZIP value: Please enter a ZIP code 5 digits long.<br>";
+      pass = false;
     }
 
     const cvvRegex = /^[0-9]{3}$/; //this regex value is for a 3 digit cvv number
@@ -359,11 +371,13 @@ function validatePaymentDetails() {
     } else {
       cvv.className = "invalid";
       errorText += "CVV: Please enter a 3 digit CVV code. <br>";
+      pass = false;
     }
   } else {
     errorText = "";
   }
   errorMessagePaymentInfo.innerHTML = errorText; //the error text is updated to reflect any errors
+  return pass;
 }
 
 setPaymentOption("block", "none", "none"); //initialise payment option
