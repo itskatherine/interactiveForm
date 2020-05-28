@@ -127,8 +127,19 @@ option {
   font-family: "roboto", sans-serif;
 }
 
+.invalid {
+  border: 2px solid red;
+}
+
+.valid {
+  border: 2px solid green;
+}
+
 .disabled {
   text-decoration: line-through;
+}
+.error {
+  color: red;
 }
 
 /* ================================= 
